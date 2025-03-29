@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的个人照片集</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* 头部样式 */
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px 0;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* 按钮样式统一 */
+        .header-buttons {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-left: 20px;
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .upload-btn, .login-btn, .logout-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-width: 120px;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .upload-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .upload-btn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .login-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .login-btn:hover {
+            background-color: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            position: relative;
+            right: auto;
+            top: auto;
+            transform: none;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* 主要内容区域 */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 预览区域样式 */
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .preview-item {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .preview-item:hover {
+            transform: scale(1.05);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* 画廊样式 */
+        .gallery-container {
+            position: relative;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            height: calc(100vh - 200px);  /* 设置固定高度 */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gallery {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;  /* 占据剩余空间 */
+            position: relative;
+            overflow: hidden;  /* 防止内容溢出 */
+        }
+
+        .gallery-item {
+            display: none;
+            width: 100%;
+            height: 100%;  /* 设置高度为100% */
+            margin: 0 auto;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .gallery-item.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;  /* 设置高度为100% */
+            object-fit: contain;  /* 保持图片比例 */
+            display: block;
+            border-radius: 10px;
+        }
+
+        .gallery-item .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            padding: 20px;
+            color: white;
+        }
+
+        .gallery-item .overlay h3 {
+            margin: 0;
+            font-size: 1.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .gallery-item .overlay p {
+            margin: 5px 0 0;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        /* 导航按钮样式 */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-btn:hover {
+            background-color: white;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .prev-btn {
+            left: 20px;
+        }
+
+        .next-btn {
+            right: 20px;
+        }
+
+        /* 照片计数器样式 */
+        .photo-counter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 页脚样式 */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #1e3c72;
+            color: white;
+            margin-top: 40px;
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .header-buttons {
+                position: static;
+                transform: none;
+                margin: 20px auto;
+                justify-content: center;
+            }
+
+            .logout-btn {
+                position: static;
+                transform: none;
+                margin-left: 20px;
+            }
+
+            .gallery-container {
+                height: calc(100vh - 300px);  /* 移动端调整高度 */
+                margin: 20px;
+                padding: 10px;
+            }
+
+            .nav-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .current-time {
+                position: static;
+                text-align: center;
+                margin: 10px auto;
+                display: inline-block;
+            }
+        }
+
+        .top-right-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .current-time {
+            color: white;
+            font-size: 1.2em;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            margin-right: 10px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .top-right-buttons {
+                position: static;
+                justify-content: center;
+                margin: 10px auto;
+            }
+
+            .current-time {
+                margin-right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>我的照片墙</h1>
+        <div class="header-buttons">
+            <div class="upload-section">
+                <input type="file" id="fileInput" accept="image/*" multiple>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-upload"></i> 上传新照片
+                </button>
+            </div>
+            <button class="login-btn" id="loginBtn" onclick="showLoginModal()">
+                <i class="fas fa-user"></i> 登录
+            </button>
+        </div>
+        <div class="top-right-buttons">
+            <div class="current-time" id="currentTime"></div>
+            <button class="logout-btn" onclick="logout()">退出登录</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="upload-section">
+            <div class="preview-container" id="previewContainer"></div>
+        </div>
+
+        <div class="gallery-container">
+            <button class="nav-btn prev-btn" id="prevBtn">←</button>
+            <button class="nav-btn next-btn" id="nextBtn">→</button>
+            <div class="gallery" id="gallery">
+                <div class="gallery-item active">
+                    <img src="images/86d6277f9e2f0708023dc39efb24b899a901f270.png" alt="照片1">
+                    <div class="overlay">
+                        <h3>美好回忆</h3>
+                        <p>2024年春天</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="images/0372cfdc3cce59eb96512b8944dcdd099095.png@h_1280" alt="照片2">
+                    <div class="overlay">
+                        <h3>难忘时刻</h3>
+                        <p>2024年夏天</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="images/b21c8701a18b87d6007a4281150828381f30fd70.png" alt="照片3">
+                    <div class="overlay">
+                        <h3>精彩瞬间</h3>
+                        <p>2024年秋天</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="images/005KPAJ7ly1hzb5cp1m28j31402esk1b.jpg" alt="照片4">
+                    <div class="overlay">
+                        <h3>温暖记忆</h3>
+                        <p>2024年冬天</p>
+                    </div>
+                </div>
+            </div>
+            <div class="photo-counter" id="photoCounter">1 / 4</div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 我的个人照片集. 保留所有权利.</p>
+    </footer>
+
+    <script>
+        // 检查登录状态
+        function checkLogin() {
+            if (!localStorage.getItem('isLoggedIn')) {
+                window.location.href = 'login.html';
+            } else {
+                // 登录后隐藏登录按钮
+                document.getElementById('loginBtn').style.display = 'none';
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'login.html';
+        }
+
+        // 页面加载时检查登录状态
+        window.onload = checkLogin;
+
+        // 更新时间的函数
+        function updateTime() {
+            const now = new Date();
+            const dateString = now.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            const timeString = now.toLocaleTimeString('zh-CN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            document.getElementById('currentTime').textContent = `${dateString} ${timeString}`;
+        }
+
+        // 页面加载时更新时间
+        updateTime();
+        // 每秒更新一次时间
+        setInterval(updateTime, 1000);
+    </script>
+    <script src="script.js"></script>
+</body>
+</html> 
